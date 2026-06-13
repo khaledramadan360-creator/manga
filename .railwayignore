@@ -1,0 +1,6 @@
+node_modules
+.env
+.git
+uploads
+public/uploads
+images

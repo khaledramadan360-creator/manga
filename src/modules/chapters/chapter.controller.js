@@ -1,0 +1,53 @@
+'use strict';
+
+const chapterService = require('./chapter.service');
+const ApiResponse    = require('../../core/utils/ApiResponse');
+
+/**
+ * GET /api/chapters/manga/:mangaSlug
+ * فصول مانجا معينة بالـ slug مع pagination وترتيب
+ */
+const getChaptersByManga = async (req, res, next) => {
+  try {
+    const { manga, data, meta } = await chapterService.getChaptersByManga(
+      req.params.mangaSlug,
+      req.query,
+    );
+    ApiResponse.ok(res, `فصول مانجا "${manga.title}"`, data, meta);
+  } catch (err) { next(err); }
+};
+
+/**
+ * GET /api/chapters/:mangaSlug/:chapterNumber
+ * تفاصيل الفصل وصفحاته مع أرقام الفصول المجاورة (prev/next)
+ *
+ * Query: ?session_id=abc123  (اختياري — لتتبع المشاهدات)
+ * مثال: GET /api/chapters/one-piece/1?session_id=xyz
+ */
+const getChapterBySlugAndNumber = async (req, res, next) => {
+  try {
+    const sessionId     = req.query.session_id || undefined;
+    const chapterNumber = parseFloat(req.params.chapterNumber);
+
+    if (isNaN(chapterNumber)) {
+      return res.status(400).json({ success: false, message: 'رقم الفصل غير صحيح' });
+    }
+
+    const { chapter, prev_chapter_number, next_chapter_number } =
+      await chapterService.getChapterBySlugAndNumber(
+        req.params.mangaSlug,
+        chapterNumber,
+        sessionId,
+      );
+
+    const data = {
+      ...chapter.toJSON(),
+      prev_chapter_number,
+      next_chapter_number,
+    };
+
+    ApiResponse.ok(res, `تفاصيل الفصل رقم ${chapter.chapter_number}`, data);
+  } catch (err) { next(err); }
+};
+
+module.exports = { getChaptersByManga, getChapterBySlugAndNumber };
