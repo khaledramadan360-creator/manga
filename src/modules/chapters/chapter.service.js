@@ -111,4 +111,64 @@ const getChapterBySlugAndNumber = async (mangaSlug, chapterNumber, sessionId) =>
   };
 };
 
-module.exports = { getChaptersByManga, getChapterBySlugAndNumber };
+/**
+ * جلب تفاصيل فصل معين بالـ ID (UUID) + صفحاته
+ *
+ * @param {string}           id            — ID الفصل (UUID)
+ * @param {string|undefined} sessionId     — الـ device/session ID من الفرونت (اختياري)
+ */
+const getChapterById = async (id, sessionId) => {
+  // نجيب الفصل بـ ID بتاعه
+  const chapter = await Chapter.findByPk(id, {
+    include: [
+      {
+        model:      Page,
+        as:         'pages',
+        attributes: ['id', 'page_number', 'image_url'],
+      },
+      {
+        model:      Manga,
+        as:         'manga',
+        attributes: ['id', 'slug', 'title', 'cover_url'],
+      },
+    ],
+  });
+  if (!chapter) throw ApiError.notFound('الفصل ده مش موجود');
+
+  // ترتيب الصفحات تصاعدياً
+  if (chapter.pages) {
+    chapter.pages.sort((a, b) => a.page_number - b.page_number);
+  }
+
+  // ─── عد المشاهدات بالـ Session Tracking ────────────────────────────────────
+  if (shouldCount(sessionId, chapter.id)) {
+    await chapter.increment('views');
+  }
+
+  // ─── جلب رقم الفصل السابق والتالي ──────────────────────────────────────────
+  const prevChapter = await Chapter.findOne({
+    where: {
+      manga_id:       chapter.manga_id,
+      chapter_number: { [Op.lt]: chapter.chapter_number },
+    },
+    order:      [['chapter_number', 'DESC']],
+    attributes: ['chapter_number'],
+  });
+
+  const nextChapter = await Chapter.findOne({
+    where: {
+      manga_id:       chapter.manga_id,
+      chapter_number: { [Op.gt]: chapter.chapter_number },
+    },
+    order:      [['chapter_number', 'ASC']],
+    attributes: ['chapter_number'],
+  });
+
+  return {
+    chapter,
+    prev_chapter_number: prevChapter?.chapter_number ?? null,
+    next_chapter_number: nextChapter?.chapter_number ?? null,
+  };
+};
+
+module.exports = { getChaptersByManga, getChapterBySlugAndNumber, getChapterById };

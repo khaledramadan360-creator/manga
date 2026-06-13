@@ -14,4 +14,7 @@ router.get('/manga/:mangaSlug', validate(chapterListQuerySchema, 'query'), contr
 // مثال: GET /api/chapters/one-piece/1  أو  /api/chapters/look-back/1.5
 router.get('/:mangaSlug/:chapterNumber', controller.getChapterBySlugAndNumber);
 
+// GET /api/chapters/:id — تفاصيل فصل معين بالـ ID (UUID) (مستعمل كـ fallback للأدمن وتتبع المشاهدات)
+router.get('/:id', controller.getChapterById);
+
 module.exports = router;

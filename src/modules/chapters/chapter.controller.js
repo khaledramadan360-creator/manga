@@ -50,4 +50,26 @@ const getChapterBySlugAndNumber = async (req, res, next) => {
   } catch (err) { next(err); }
 };
 
-module.exports = { getChaptersByManga, getChapterBySlugAndNumber };
+/**
+ * GET /api/chapters/:id
+ * تفاصيل الفصل وصفحاته بالـ ID (UUID)
+ *
+ * Query: ?session_id=abc123  (اختياري — لتتبع المشاهدات)
+ */
+const getChapterById = async (req, res, next) => {
+  try {
+    const sessionId = req.query.session_id || undefined;
+    const { chapter, prev_chapter_number, next_chapter_number } =
+      await chapterService.getChapterById(req.params.id, sessionId);
+
+    const data = {
+      ...chapter.toJSON(),
+      prev_chapter_number,
+      next_chapter_number,
+    };
+
+    ApiResponse.ok(res, `تفاصيل الفصل رقم ${chapter.chapter_number}`, data);
+  } catch (err) { next(err); }
+};
+
+module.exports = { getChaptersByManga, getChapterBySlugAndNumber, getChapterById };
