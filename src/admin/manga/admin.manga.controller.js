@@ -46,9 +46,16 @@ const buildSlug = (title, excludeId = null) =>
  * GET /api/admin/manga/:id
  * جلب بيانات مانجا واحدة بالـ ID للعرض في لوحة التحكم
  */
+const isUUID = (str) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+
 const getById = async (req, res, next) => {
   try {
-    const manga = await Manga.findByPk(req.params.id, {
+    const param = req.params.id;
+    const where = isUUID(param) ? { id: param } : { slug: param };
+
+    const manga = await Manga.findOne({
+      where,
       include: [
         { model: Genre,   as: 'genres',   attributes: ['id', 'name', 'slug'], through: { attributes: [] } },
         { model: Chapter, as: 'chapters', attributes: ['id', 'chapter_number', 'title', 'views', 'created_at'],
@@ -160,7 +167,9 @@ const create = async (req, res, next) => {
  */
 const update = async (req, res, next) => {
   try {
-    const manga = await Manga.findByPk(req.params.id);
+    const param = req.params.id;
+    const where = isUUID(param) ? { id: param } : { slug: param };
+    const manga = await Manga.findOne({ where });
     if (!manga) return next(ApiError.notFound('المانجا مش موجودة'));
 
     const fields = pickMangaFields(req.body);
@@ -192,7 +201,9 @@ const updateCover = async (req, res, next) => {
   try {
     if (!req.file) return next(ApiError.badRequest('لازم ترفع صورة الغلاف'));
 
-    const manga = await Manga.findByPk(req.params.id, { attributes: ['id', 'cover_key', 'cover_url'] });
+    const param = req.params.id;
+    const where = isUUID(param) ? { id: param } : { slug: param };
+    const manga = await Manga.findOne({ where, attributes: ['id', 'cover_key', 'cover_url'] });
     if (!manga) return next(ApiError.notFound('المانجا مش موجودة'));
 
     // حذف الغلاف القديم
@@ -212,7 +223,10 @@ const updateCover = async (req, res, next) => {
  */
 const remove = async (req, res, next) => {
   try {
-    const manga = await Manga.findByPk(req.params.id, {
+    const param = req.params.id;
+    const where = isUUID(param) ? { id: param } : { slug: param };
+    const manga = await Manga.findOne({
+      where,
       include: [{ model: Chapter, as: 'chapters', attributes: ['id'] }],
     });
     if (!manga) return next(ApiError.notFound('المانجا مش موجودة'));
