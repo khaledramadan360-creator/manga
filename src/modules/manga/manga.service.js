@@ -84,8 +84,18 @@ const getBySlug = async (slug) => {
   // زيادة المشاهدات
   await manga.increment('views');
 
-  return manga;
+  // ─── SEO Fallback ────────────────────────────────────────────────────────
+  // لو meta_title فاضي → استخدم العنوان العادي
+  // لو meta_description فاضي → استخدم أول 160 حرف من description
+  const data = manga.toJSON();
+  data.seo = {
+    title:       data.meta_title       || data.title,
+    description: data.meta_description || (data.description ? data.description.slice(0, 160) : ''),
+  };
+
+  return data;
 };
+
 
 /**
  * آخر 20 فصل اتضاف (للـ home page)

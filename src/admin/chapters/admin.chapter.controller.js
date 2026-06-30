@@ -15,9 +15,15 @@ const create = async (req, res, next) => {
     const manga = await Manga.findByPk(mangaId, { attributes: ['id', 'title'] });
     if (!manga) return next(ApiError.notFound('المانجا مش موجودة'));
 
-    const { chapter_number, title } = req.body;
+    const { chapter_number, title, meta_title, meta_description } = req.body;
 
-    const chapter = await Chapter.create({ manga_id: mangaId, chapter_number, title });
+    const chapter = await Chapter.create({
+      manga_id: mangaId,
+      chapter_number,
+      title,
+      meta_title:       meta_title       || null,
+      meta_description: meta_description || null,
+    });
     ApiResponse.created(res, `تم إضافة الفصل ${chapter_number} بنجاح`, chapter);
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') {
@@ -36,8 +42,16 @@ const update = async (req, res, next) => {
     const chapter = await Chapter.findByPk(req.params.id);
     if (!chapter) return next(ApiError.notFound('الفصل مش موجود'));
 
-    const { chapter_number, title } = req.body;
-    await chapter.update({ chapter_number, title });
+    const { chapter_number, title, meta_title, meta_description } = req.body;
+
+    // بنحدث بس الـ fields اللي اتبعتت
+    const updates = {};
+    if (chapter_number   !== undefined) updates.chapter_number   = chapter_number;
+    if (title            !== undefined) updates.title            = title;
+    if (meta_title       !== undefined) updates.meta_title       = meta_title || null;
+    if (meta_description !== undefined) updates.meta_description = meta_description || null;
+
+    await chapter.update(updates);
     ApiResponse.ok(res, 'تم تعديل الفصل بنجاح', chapter);
   } catch (err) {
     if (err.name === 'SequelizeUniqueConstraintError') {

@@ -6,9 +6,13 @@ const CURRENT_YEAR = new Date().getFullYear();
 
 // Schema لإضافة مانجا جديدة (كلها ترسل كـ multipart/form-data)
 const createMangaSchema = z.object({
-  title:        z.string().min(1, 'العنوان مطلوب').max(255),
-  title_alt:    z.string().max(255).optional(),
-  description:  z.string().optional(),
+  title:            z.string().min(1, 'العنوان مطلوب').max(255),
+  title_alt:        z.string().max(255).optional(),
+  description:      z.string().optional(),
+  // ─── SEO ──────────────────────────────────────────────────────────────────
+  meta_title:       z.string().max(255).optional(),
+  meta_description: z.string().max(500).optional(),
+  // ──────────────────────────────────────────────────────────────────────────
   status:       z.enum(['ongoing', 'completed', 'hiatus', 'cancelled']).optional().default('ongoing'),
   type:         z.enum(['manga', 'manhwa', 'manhua']).optional().default('manga'),
   author:       z.string().max(100).optional(),

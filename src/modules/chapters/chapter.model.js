@@ -26,6 +26,17 @@ const Chapter = sequelize.define('Chapter', {
     type: DataTypes.STRING(255),
     allowNull: true,
   },
+  // ─── SEO Fields ───────────────────────────────────────────────────
+  meta_title: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'عنوان SEO مخصص — لو فاضي بيتولد تلقائياً',
+  },
+  meta_description: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'وصف SEO مخصص — لو فاضي بيتولد تلقائياً',
+  },
   views: {
     type: DataTypes.INTEGER,
     defaultValue: 0,

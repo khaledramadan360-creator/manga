@@ -22,7 +22,11 @@ const syncGenres = async (manga, genresStr) => {
 
 // ─── Helper: استخرج الـ fields الخاصة بالمانجا من الـ body ───────────────────
 const pickMangaFields = (body) => {
-  const allowed = ['title', 'title_alt', 'description', 'status', 'type', 'author', 'artist', 'release_year'];
+  const allowed = [
+    'title', 'title_alt', 'description',
+    'meta_title', 'meta_description',          // ← SEO fields
+    'status', 'type', 'author', 'artist', 'release_year',
+  ];
   return Object.fromEntries(
     Object.entries(body).filter(([key]) => allowed.includes(key))
   );

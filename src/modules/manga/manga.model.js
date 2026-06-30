@@ -27,6 +27,17 @@ const Manga = sequelize.define('Manga', {
     type: DataTypes.TEXT,
     allowNull: true,
   },
+  // ─── SEO Fields ───────────────────────────────────────────────────────────
+  meta_title: {
+    type: DataTypes.STRING(255),
+    allowNull: true,
+    comment: 'عنوان الـ SEO — لو فاضي بيُستخدم title تلقائياً',
+  },
+  meta_description: {
+    type: DataTypes.STRING(500),
+    allowNull: true,
+    comment: 'وصف الـ SEO — لو فاضي بيُستخدم أول 160 حرف من description',
+  },
   cover_url: {
     type: DataTypes.STRING(500),
     allowNull: true,

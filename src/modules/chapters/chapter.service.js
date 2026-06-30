@@ -104,12 +104,32 @@ const getChapterBySlugAndNumber = async (mangaSlug, chapterNumber, sessionId) =>
     attributes: ['chapter_number'],
   });
 
+  // ─── SEO: مخصص أو توليد تلقائي ─────────────────────────────────────────────
+  const mangaTitle        = chapter.manga?.title || manga.title;
+  const chapterNumClean   = parseFloat(chapterNumber); // 1.0 → 1
+  const chapterTitlePart  = chapter.title ? ` — ${chapter.title}` : '';
+
+  // لو الأدمن كتب قيم مخصصة نستخدمها، لو لا نولد تلقائي
+  const seoTitle = chapter.meta_title ||
+    `مانجا ${mangaTitle} الفصل ${chapterNumClean}${chapterTitlePart} مترجم للعربية`;
+
+  const seoDescription = chapter.meta_description ||
+    `اقرأ مانجا ${mangaTitle} الفصل ${chapterNumClean} مترجم أونلاين وبالكامل. ` +
+    `شاهد صفحات الفصل ${chapterNumClean} من ${mangaTitle} بجودة عالية على موقعنا.`;
+
+  const chapterData = chapter.toJSON();
+  chapterData.seo = {
+    title:       seoTitle,
+    description: seoDescription,
+  };
+
   return {
-    chapter,
+    chapter:             chapterData,
     prev_chapter_number: prevChapter?.chapter_number ?? null,
     next_chapter_number: nextChapter?.chapter_number ?? null,
   };
 };
+
 
 /**
  * جلب تفاصيل فصل معين بالـ ID (UUID) + صفحاته
