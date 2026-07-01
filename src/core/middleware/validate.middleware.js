@@ -13,7 +13,9 @@ const validate = (schema, source = 'body') => {
     const result = schema.safeParse(req[source]);
 
     if (!result.success) {
-      const errors = result.error.errors.map((e) => ({
+      // Zod v4 غيّر result.error.errors إلى result.error.issues
+      const issues = result.error.issues ?? result.error.errors ?? [];
+      const errors = issues.map((e) => ({
         field: e.path.join('.'),
         message: e.message,
       }));
