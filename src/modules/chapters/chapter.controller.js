@@ -41,7 +41,7 @@ const getChapterBySlugAndNumber = async (req, res, next) => {
       );
 
     const data = {
-      ...chapter.toJSON(),
+      ...(typeof chapter.toJSON === 'function' ? chapter.toJSON() : chapter),
       prev_chapter_number,
       next_chapter_number,
     };
@@ -63,7 +63,7 @@ const getChapterById = async (req, res, next) => {
       await chapterService.getChapterById(req.params.id, sessionId);
 
     const data = {
-      ...chapter.toJSON(),
+      ...(typeof chapter.toJSON === 'function' ? chapter.toJSON() : chapter),
       prev_chapter_number,
       next_chapter_number,
     };

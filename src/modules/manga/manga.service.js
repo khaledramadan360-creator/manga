@@ -85,11 +85,14 @@ const getBySlug = async (slug) => {
   await manga.increment('views');
 
   // ─── SEO Fallback ────────────────────────────────────────────────────────
-  // لو meta_title فاضي → استخدم العنوان العادي
+  // لو meta_title فاضي → ولد عنوان SEO احترافي تلقائياً
   // لو meta_description فاضي → استخدم أول 160 حرف من description
   const data = manga.toJSON();
+  
+  const seoTitle = data.meta_title || `مانجا ${data.title} مترجمة عربي جميع الفصول`;
+
   data.seo = {
-    title:       data.meta_title       || data.title,
+    title:       seoTitle,
     description: data.meta_description || (data.description ? data.description.slice(0, 160) : ''),
   };
 
